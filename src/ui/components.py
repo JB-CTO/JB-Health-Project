@@ -258,10 +258,16 @@ def plot_correlation_scatter(df: pd.DataFrame, x_col: str, y_col: str, title: st
     if valid.empty:
         return go.Figure()
 
-    fig = px.scatter(
-        valid, x=x_col, y=y_col,
-        trendline="ols",
-        color_discrete_sequence=[COLORS["primary_light"]]
-    )
+    try:
+        fig = px.scatter(
+            valid, x=x_col, y=y_col,
+            trendline="ols",
+            color_discrete_sequence=[COLORS["primary_light"]]
+        )
+    except Exception:
+        fig = px.scatter(
+            valid, x=x_col, y=y_col,
+            color_discrete_sequence=[COLORS["primary_light"]]
+        )
     apply_dark_layout(fig, title=title or f"{x_col} vs {y_col}", height=380)
     return fig
