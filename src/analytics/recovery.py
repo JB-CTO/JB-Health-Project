@@ -1,4 +1,4 @@
-﻿"""
+"""
 Recovery and Sleep Scoring Engine.
 Computes daily physiological readiness scores, HRV baseline z-scores,
 resting heart rate deviations, and cumulative sleep debt.

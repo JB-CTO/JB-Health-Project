@@ -1,4 +1,4 @@
-﻿"""
+"""
 Reusable UI components, Plotly chart builders, and style helpers for JB-Health-Project.
 """
 

@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from src.database import init_db, get_session, BiomarkerRecord
 from src.parsers.quest_diagnostics import QuestDiagnosticsParser, parse_reference_range, classify_category
 

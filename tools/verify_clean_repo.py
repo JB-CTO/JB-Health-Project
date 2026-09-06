@@ -1,4 +1,4 @@
-﻿"""
+"""
 Pre-Commit & Pre-Push PHI / Secret Security Scanner.
 Guarantees that NO personal health information (PHI), real patient data,
 private databases, or API keys are exposed or committed to Git.

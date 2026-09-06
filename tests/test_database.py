@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from pathlib import Path
 from src.database import init_db, get_session, SleepRecord, HeartRecord, ActivityRecord, WorkoutRecord, BiomarkerRecord
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Database models and connection management for JB-Health-Project.
 Stores health data from Apple Health, MyFitnessPal, and Quest Diagnostics.
 """

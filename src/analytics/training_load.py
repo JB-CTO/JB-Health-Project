@@ -1,4 +1,4 @@
-﻿"""
+"""
 Training Load & Workout Performance Analytics Engine.
 Calculates Acute Training Load (ATL / Fatigue), Chronic Training Load (CTL / Fitness),
 Training Stress Balance (TSB / Freshness), ACWR (Acute:Chronic Workload Ratio),

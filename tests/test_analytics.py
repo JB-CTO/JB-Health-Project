@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from src.database import init_db
 from src.parsers.apple_health import AppleHealthParser
 from src.analytics.recovery import compute_daily_recovery

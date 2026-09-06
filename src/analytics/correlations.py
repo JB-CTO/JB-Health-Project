@@ -1,4 +1,4 @@
-﻿"""
+"""
 Multivariate Correlation & Lifestyle Insights Engine.
 Computes correlations between lifestyle inputs (nutrition, workouts, activity)
 and physiological outputs (sleep stages, HRV, resting heart rate, recovery).

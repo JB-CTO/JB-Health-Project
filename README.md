@@ -1,4 +1,4 @@
-﻿# ⚡ JB-Health-Project
+# ⚡ JB-Health-Project
 
 > **An open-source, privacy-first personal health, recovery, and performance intelligence platform.**  
 > Unify data from **Apple Health**, **MyFitnessPal**, and **Quest Diagnostics (Blood Work)** into interactive, actionable dashboards to optimize sleep, physiological recovery, and athletic training load.

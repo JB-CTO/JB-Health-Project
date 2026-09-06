@@ -1,4 +1,4 @@
-﻿"""
+"""
 Apple Health Export Parser (Streaming XML).
 Parses Apple Health exports (export.xml or export.zip) efficiently without memory overload.
 Extracts sleep stages, HRV, resting heart rate, active calories, workouts, and nutrition sync.

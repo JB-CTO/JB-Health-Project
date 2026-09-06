@@ -1,4 +1,4 @@
-﻿"""
+"""
 MyFitnessPal CSV Parser.
 Supports nutrition and exercise CSV exports directly from MyFitnessPal.
 Handles both meal-by-meal and daily aggregate export formats.

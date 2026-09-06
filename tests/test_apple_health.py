@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from pathlib import Path
 from src.database import init_db, get_session, SleepRecord, HeartRecord, WorkoutRecord
 from src.parsers.apple_health import AppleHealthParser, clean_workout_type, get_sleep_canonical_date

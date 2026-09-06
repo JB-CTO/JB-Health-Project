@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from src.database import init_db, get_session, NutritionRecord
 from src.parsers.myfitnesspal import MyFitnessPalParser
 

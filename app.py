@@ -42,7 +42,7 @@ st.set_page_config(
 # Load config
 config_path = Path("config.yaml")
 if config_path.exists():
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8-sig") as f:
         cfg = yaml.safe_load(f)
 else:
     cfg = {
