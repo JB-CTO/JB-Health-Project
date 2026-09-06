@@ -1,0 +1,33 @@
+﻿# JB-Health-Project Configuration
+# Customize your personal health targets, optimal ranges, and dashboard defaults
+
+user:
+  name: "Health Enthusiast"
+  weight_kg: 80.0
+  height_cm: 180.0
+
+targets:
+  sleep_hours_target: 8.0
+  deep_sleep_pct_target: 15.0      # % of total sleep
+  rem_sleep_pct_target: 20.0       # % of total sleep
+  daily_active_calories: 600
+  daily_steps_target: 10000
+  daily_protein_g_target: 160.0
+  daily_water_ml_target: 3000
+
+recovery_model:
+  hrv_baseline_days: 14            # Rolling baseline for HRV
+  rhr_baseline_days: 14            # Rolling baseline for resting heart rate
+  weights:
+    hrv_deviation: 0.40            # Importance of HRV vs baseline
+    rhr_deviation: 0.25            # Importance of RHR vs baseline
+    sleep_duration: 0.20           # Importance of total sleep
+    sleep_quality: 0.15            # Importance of deep + REM percentage
+
+training_load:
+  acute_days: 7                    # Short-term fatigue (ATL)
+  chronic_days: 28                 # Long-term fitness (CTL)
+  optimal_tsb_range: [-10, 15]     # Training Stress Balance (Freshness)
+
+database:
+  path: "data/health.db"

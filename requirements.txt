@@ -1,0 +1,19 @@
+﻿# JB-Health-Project Dependencies
+# Core Data & Analytics
+pandas>=2.2.0
+numpy>=1.26.0
+scipy>=1.13.0
+sqlalchemy>=2.0.0
+pyyaml>=6.0.1
+
+# Health File Parsing
+lxml>=5.2.0
+pypdf>=4.2.0
+pdfplumber>=0.11.0
+
+# Interactive Dashboard & Visualizations
+streamlit>=1.35.0
+plotly>=5.22.0
+
+# Testing & Quality
+pytest>=8.2.0
