@@ -29,7 +29,8 @@ from src.analytics.training_load import compute_training_load, get_training_stre
 from src.analytics.correlations import get_integrated_daily_df, compute_pairwise_correlation, compute_correlation_matrix
 from src.ui.components import (
     plot_recovery_gauge, plot_hrv_trend, plot_sleep_stages_timeline,
-    plot_training_load_tsb, plot_biomarker_trends, plot_correlation_scatter, COLORS
+    plot_training_load_tsb, plot_biomarker_trends, plot_correlation_scatter,
+    apply_dark_layout, COLORS
 )
 
 st.set_page_config(
