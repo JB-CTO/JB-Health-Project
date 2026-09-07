@@ -3,6 +3,7 @@
 > **An open-source, privacy-first personal health, recovery, and performance intelligence platform.**  
 > Unify data from **Apple Health**, **MyFitnessPal**, and **Quest Diagnostics (Blood Work)** into interactive, actionable dashboards to optimize sleep, physiological recovery, and athletic training load.
 
+[![Version: v1.2.0](https://img.shields.io/badge/Version-v1.2.0-cyan.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35%2B-red.svg)](https://streamlit.io/)
@@ -153,6 +154,31 @@ Run the privacy & PHI security scanner:
 ```bash
 python tools/verify_clean_repo.py
 ```
+
+---
+
+## 🏷️ Version Tracking & Documenting Changes
+
+This project adheres to [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`). All notable releases and code changes are documented in [`CHANGELOG.md`](CHANGELOG.md).
+
+### How to document changes & bump versions
+Whenever you make updates to the codebase and want to document them in GitHub, use the automated version tracking helper:
+
+```bash
+# For bug fixes, UI tweaks, or minor updates (e.g. v1.2.0 -> v1.2.1):
+python tools/bump_version.py patch "Fixed X, polished Y"
+
+# For new features, parsers, or dashboards (e.g. v1.2.0 -> v1.3.0):
+python tools/bump_version.py minor "Added feature Z"
+
+# For breaking architectural changes (e.g. v1.2.0 -> v2.0.0):
+python tools/bump_version.py major "Overhauled data pipeline"
+```
+
+The script automatically:
+1. Increments `__version__` in `src/__version__.py`.
+2. Prepends a formatted release entry with today's date in `CHANGELOG.md`.
+3. Prompts the Git commands to commit, tag (`git tag vX.Y.Z`), and push tags (`git push --follow-tags`) to GitHub!
 
 ---
 

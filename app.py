@@ -16,6 +16,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import yaml
 
+from src.__version__ import __version__, __release_date__
 from src.database import (
     init_db, reset_db, load_table_df, get_session,
     SleepRecord, HeartRecord, ActivityRecord, WorkoutRecord, NutritionRecord, BiomarkerRecord, DailySummaryRecord
@@ -331,13 +332,16 @@ def load_demo_data_action():
 
 # Sidebar Navigation
 with st.sidebar:
-    st.markdown("""
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+    st.markdown(f"""
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
         <span style="font-size:1.8rem">⚡</span>
         <div>
             <div style="font-weight:800; font-size:1.15rem; color:#f8fafc; line-height:1.2;">JB-HEALTH</div>
             <div style="font-size:0.75rem; color:#06b6d4; font-weight:600;">INTELLIGENCE PLATFORM</div>
         </div>
+    </div>
+    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:6px; font-size:0.75rem; color:#94a3b8; margin-bottom:10px;">
+        <span>v{__version__}</span> &bull; <span>{__release_date__}</span>
     </div>
     """, unsafe_allow_html=True)
     st.markdown("---")
@@ -367,6 +371,13 @@ with st.sidebar:
         st.warning("Database cleared.")
         st.rerun()
 
+    with st.expander(f"📋 Changelog (v{__version__})", expanded=False):
+        ch_path = Path("CHANGELOG.md")
+        if ch_path.exists():
+            st.markdown(ch_path.read_text(encoding="utf-8"))
+        else:
+            st.caption("No changelog found.")
+
     st.markdown("---")
     st.markdown("""
     <div style="font-size:0.75rem; color:#64748b; line-height:1.4;">
@@ -395,7 +406,7 @@ st.markdown(f"""
     </div>
     <div class="hero-badge">
         <div class="pulse-dot"></div>
-        <span>{'Live Local Mode • ' + str(rec_count) + ' Days Active' if rec_count > 0 else 'Database Ready'}</span>
+        <span>{'Live Local Mode • v' + __version__ + ' • ' + str(rec_count) + ' Days Active' if rec_count > 0 else 'v' + __version__ + ' • Database Ready'}</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
