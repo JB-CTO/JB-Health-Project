@@ -1091,33 +1091,84 @@ with tab_import:
             <div style="font-weight:700; color:#f8fafc; font-size:1rem; display:flex; align-items:center; gap:8px;">
                 <span>🧪</span> Quest Diagnostics
             </div>
-            <div style="font-size:0.78rem; color:#94a3b8; margin-top:4px;">Official PDF lab reports or custom CSV logs.</div>
+            <div style="font-size:0.78rem; color:#94a3b8; margin-top:4px;">Official PDF lab reports or custom CSV logs (multi-file batch upload supported).</div>
         </div>
         """, unsafe_allow_html=True)
-        quest_file = st.file_uploader("Upload Quest Report", type=["pdf", "csv"], key="quest_up", label_visibility="collapsed")
-        if quest_file and st.button("Process Quest Report", use_container_width=True):
-            with st.spinner("Extracting biomarker records..."):
-                suffix = ".pdf" if quest_file.name.endswith(".pdf") else ".csv"
-                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                    tmp.write(quest_file.getvalue())
-                    tmp_path = tmp.name
-                try:
-                    cnt = QuestDiagnosticsParser(tmp_path).parse_and_store()
-                    st.success(f"Extracted {cnt} biomarkers from Quest report!")
-                    st.rerun()
-                finally:
-                    os.unlink(tmp_path)
 
-        with st.expander("📖 How to Download from Quest", expanded=False):
+        # Check for local Quest files in data/raw/
+        local_quest_files = list(Path("data/raw").glob("*.pdf")) + [p for p in Path("data/raw").glob("*.csv") if "lab" in p.name.lower() or "quest" in p.name.lower()]
+        if local_quest_files:
+            st.markdown(f"""
+            <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:10px 14px; margin-bottom:10px;">
+                <div style="color:#34d399; font-weight:600; font-size:0.82rem;">⚡ Local Files Detected in data/raw/</div>
+                <div style="color:#f8fafc; font-size:0.85rem; font-weight:700;">{len(local_quest_files)} Quest report(s) ready to import</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🚀 Import All {len(local_quest_files)} Local Quest Files", use_container_width=True):
+                total_bio = 0
+                processed_files = 0
+                with st.spinner(f"Batch processing {len(local_quest_files)} Quest files..."):
+                    for lqf in local_quest_files:
+                        try:
+                            cnt = QuestDiagnosticsParser(str(lqf)).parse_and_store()
+                            total_bio += cnt
+                            processed_files += 1
+                        except Exception as e:
+                            st.warning(f"Could not parse {lqf.name}: {e}")
+                    st.success(f"Batch completed! Processed {processed_files} files, imported {total_bio} biomarker records.")
+                    st.rerun()
+            st.caption("— OR select multiple files from your computer below —")
+
+        quest_files = st.file_uploader(
+            "Upload Quest Reports (Select Multiple)",
+            type=["pdf", "csv"],
+            accept_multiple_files=True,
+            key="quest_up",
+            label_visibility="collapsed"
+        )
+        if quest_files:
+            file_count = len(quest_files)
+            btn_label = f"Process {file_count} Quest Report{'s' if file_count > 1 else ''}"
+            if st.button(btn_label, use_container_width=True):
+                total_extracted = 0
+                successful_reports = 0
+                progress_bar = st.progress(0.0)
+                status_text = st.empty()
+
+                for idx, q_file in enumerate(quest_files):
+                    status_text.text(f"Extracting biomarkers from: {q_file.name} ({idx+1}/{file_count})...")
+                    suffix = ".pdf" if q_file.name.endswith(".pdf") else ".csv"
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                        tmp.write(q_file.getvalue())
+                        tmp_path = tmp.name
+                    try:
+                        cnt = QuestDiagnosticsParser(tmp_path).parse_and_store()
+                        total_extracted += cnt
+                        successful_reports += 1
+                    except Exception as e:
+                        st.warning(f"Failed to parse {q_file.name}: {e}")
+                    finally:
+                        os.unlink(tmp_path)
+                    progress_bar.progress((idx + 1) / file_count)
+
+                status_text.empty()
+                progress_bar.empty()
+                st.success(f"Batch complete! Successfully extracted {total_extracted} total biomarker records from {successful_reports} Quest reports.")
+                st.rerun()
+
+        with st.expander("📖 How to Download & Batch Import from Quest", expanded=False):
             st.markdown("""
+            **Batch Uploading Multiple Lab Reports:**
+            - You can select and drop **multiple PDF reports at the same time**! Hold `Ctrl` (or `Cmd` on Mac) or `Shift` to select multiple files in your file browser.
+            
             **How to download official Quest PDF reports:**
             1. Log into your patient account at **[myquest.questdiagnostics.com](https://myquest.questdiagnostics.com)** (or the MyQuest mobile app).
             2. Go to the **Results** or **Lab Results** tab.
-            3. Click on your lab appointment / blood draw date.
-            4. Click **Download PDF Report** (or *View/Download Official PDF Report*).
-            5. Drag & drop the downloaded `.pdf` file into the uploader above.
+            3. Click on each lab appointment / blood draw date.
+            4. Click **Download PDF Report** for each date.
+            5. Drag & drop all your downloaded `.pdf` files together into the box above.
             
-            💡 *Spreadsheet Users: You can also upload a `.csv` with columns: `date, test_name, value, unit, ref_low, ref_high, flag`.*
+            💡 *Spreadsheet Users: You can also upload multi-draw `.csv` logs with columns: `date, test_name, value, unit, ref_low, ref_high, flag`.*
             """)
 
     st.markdown("---")
