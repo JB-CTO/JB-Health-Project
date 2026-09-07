@@ -548,13 +548,20 @@ with tab_recovery:
 with tab_sleep:
     if not df_filtered.empty and "total_sleep_hours" in df_filtered.columns:
         s_col1, s_col2, s_col3, s_col4 = st.columns(4)
-        avg_sleep = df_filtered["total_sleep_hours"].mean()
-        avg_deep = df_filtered["deep_sleep_hours"].mean()
-        avg_rem = df_filtered["rem_sleep_hours"].mean()
+        # Filter for days where sleep was recorded (> 0.5 hours) to avoid skewing averages with unworn days
+        valid_sleep = df_filtered[df_filtered["total_sleep_hours"] > 0.5] if "total_sleep_hours" in df_filtered.columns else pd.DataFrame()
+        if not valid_sleep.empty:
+            avg_sleep = valid_sleep["total_sleep_hours"].mean()
+            avg_deep = valid_sleep["deep_sleep_hours"].mean()
+            avg_rem = valid_sleep["rem_sleep_hours"].mean()
+            avg_score = valid_sleep["sleep_score"].mean()
+        else:
+            avg_sleep = avg_deep = avg_rem = avg_score = 0.0
+
         deep_pct = (avg_deep / avg_sleep * 100) if avg_sleep > 0 else 0
         rem_pct = (avg_rem / avg_sleep * 100) if avg_sleep > 0 else 0
-        core_pct = max(0.0, 100.0 - (deep_pct + rem_pct + 7.0))
-        awake_pct = 7.0
+        core_pct = max(0.0, 100.0 - (deep_pct + rem_pct))
+        awake_pct = 0.0
 
         with s_col1:
             diff_target = avg_sleep - targets.get("sleep_hours_target", 8.0)
@@ -591,7 +598,6 @@ with tab_sleep:
             ), unsafe_allow_html=True)
 
         with s_col4:
-            avg_score = df_filtered["sleep_score"].mean()
             st.markdown(render_stat_card(
                 title="Sleep Quality Score",
                 value=f"{avg_score:.1f}",

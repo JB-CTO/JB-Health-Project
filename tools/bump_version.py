@@ -53,7 +53,7 @@ __version_info__ = ({", ".join(new_version.split("."))})
 __release_date__ = "{today_str}"
 '''
     VERSION_FILE.write_text(content, encoding="utf-8")
-    print(f"✔ Updated {VERSION_FILE} to v{new_version}")
+    print(f"[OK] Updated {VERSION_FILE} to v{new_version}")
 
 
 def update_changelog(new_version: str, message: str, category: str = "Changed"):
@@ -79,7 +79,7 @@ def update_changelog(new_version: str, message: str, category: str = "Changed"):
         updated = f"# 📋 Changelog\n\nAll notable changes documented here.\n\n---\n\n{new_section}"
 
     CHANGELOG_FILE.write_text(updated, encoding="utf-8")
-    print(f"✔ Documented v{new_version} in {CHANGELOG_FILE}")
+    print(f"[OK] Documented v{new_version} in {CHANGELOG_FILE}")
 
 
 def main():

@@ -3,7 +3,7 @@
 > **An open-source, privacy-first personal health, recovery, and performance intelligence platform.**  
 > Unify data from **Apple Health**, **MyFitnessPal**, and **Quest Diagnostics (Blood Work)** into interactive, actionable dashboards to optimize sleep, physiological recovery, and athletic training load.
 
-[![Version: v1.2.0](https://img.shields.io/badge/Version-v1.2.0-cyan.svg)](CHANGELOG.md)
+[![Version: v1.2.2](https://img.shields.io/badge/Version-v1.2.2-cyan.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35%2B-red.svg)](https://streamlit.io/)

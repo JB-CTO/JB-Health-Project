@@ -12,6 +12,7 @@ import re
 
 from lxml import etree
 import pandas as pd
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.database import (
@@ -21,6 +22,7 @@ from src.database import (
 # Mapping Apple Health Sleep Values
 SLEEP_STAGE_MAP = {
     "HKCategoryValueSleepAnalysisInBed": "InBed",
+    "HKCategoryValueSleepAnalysisAsleep": "Core",
     "HKCategoryValueSleepAnalysisAsleepUnspecified": "Core",
     "HKCategoryValueSleepAnalysisAsleepCore": "Core",
     "HKCategoryValueSleepAnalysisAsleepDeep": "Deep",
@@ -124,7 +126,7 @@ class AppleHealthParser:
                                     end_time=end_dt,
                                     stage=stage,
                                     duration_minutes=duration_min,
-                                    source="AppleHealth"
+                                    source=attrib.get("sourceName", "AppleHealth")
                                 )
                                 pending_records.append(sleep_rec)
                                 counts["sleep"] += 1
@@ -143,7 +145,7 @@ class AppleHealthParser:
                                 metric="hrv_sdnn",
                                 value=val,
                                 unit=unit,
-                                source="AppleHealth"
+                                source=attrib.get("sourceName", "AppleHealth")
                             ))
                             counts["hrv"] += 1
                         except Exception:
@@ -160,7 +162,7 @@ class AppleHealthParser:
                                 metric="resting_hr",
                                 value=val,
                                 unit="bpm",
-                                source="AppleHealth"
+                                source=attrib.get("sourceName", "AppleHealth")
                             ))
                             counts["resting_hr"] += 1
                         except Exception:
@@ -262,7 +264,7 @@ class AppleHealthParser:
                             duration_minutes=round(duration, 1),
                             calories_burned=round(cals, 1),
                             distance_km=round(dist, 2),
-                            source="AppleHealth"
+                            source=attrib.get("sourceName", "AppleHealth")
                         ))
                         counts["workouts"] += 1
                     except Exception:
@@ -332,6 +334,18 @@ class AppleHealthParser:
                         source="AppleHealth"
                     ))
                 counts["nutrition"] += 1
+
+            # Database deduplication sweep to prevent duplicate entries if re-imported
+            dedup_queries = [
+                "DELETE FROM sleep_records WHERE id NOT IN (SELECT min(id) FROM sleep_records GROUP BY start_time, end_time, stage)",
+                "DELETE FROM heart_records WHERE id NOT IN (SELECT min(id) FROM heart_records GROUP BY timestamp, metric)",
+                "DELETE FROM workout_records WHERE id NOT IN (SELECT min(id) FROM workout_records GROUP BY start_time, end_time, activity_type)"
+            ]
+            for dq in dedup_queries:
+                try:
+                    session.execute(text(dq))
+                except Exception:
+                    pass
 
             session.commit()
 

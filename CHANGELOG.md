@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.2] - 2026-09-07
+
+### Changed
+- Fix sleep duration calculation: resolve multi-device overlapping intervals and deduplicate database records
+
+---
+
 ## [1.2.0] - 2026-09-07
 
 ### Added

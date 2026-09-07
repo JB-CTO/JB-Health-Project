@@ -5,7 +5,7 @@ resting heart rate deviations, and cumulative sleep debt.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from sqlalchemy import func
@@ -13,8 +13,33 @@ from sqlalchemy import func
 from src.database import SleepRecord, HeartRecord, DailySummaryRecord, get_session
 
 
+def merge_time_intervals(intervals: List[Tuple[datetime, datetime]]) -> float:
+    """
+    Merges overlapping or adjacent [start, end] time intervals and returns total minutes.
+    Prevents artificial inflation of sleep duration from multiple devices (e.g. Apple Watch
+    and iPhone recording simultaneously) or duplicate segment imports.
+    """
+    if not intervals:
+        return 0.0
+    valid = [(s, e) for s, e in intervals if e > s]
+    if not valid:
+        return 0.0
+    sorted_int = sorted(valid, key=lambda x: x[0])
+    merged = [sorted_int[0]]
+    for cur_s, cur_e in sorted_int[1:]:
+        last_s, last_e = merged[-1]
+        if cur_s <= last_e:  # Overlapping or contiguous interval
+            merged[-1] = (last_s, max(last_e, cur_e))
+        else:
+            merged.append((cur_s, cur_e))
+    return sum((end - start).total_seconds() / 60.0 for start, end in merged)
+
+
 def calculate_sleep_metrics(date_str: str, session) -> Dict[str, float]:
-    """Calculates sleep architecture metrics for a given canonical night date."""
+    """
+    Calculates physically accurate sleep architecture metrics for a given canonical night.
+    Resolves multi-device overlapping records and enforces physical day limits (max 24h).
+    """
     records = session.query(SleepRecord).filter_by(date=date_str).all()
     if not records:
         return {
@@ -26,23 +51,46 @@ def calculate_sleep_metrics(date_str: str, session) -> Dict[str, float]:
             "sleep_score": 0.0
         }
 
-    durations = {"Deep": 0.0, "REM": 0.0, "Core": 0.0, "Awake": 0.0, "InBed": 0.0}
+    # Extract parsed interval tuples
+    valid_records = []
     for r in records:
-        st = r.stage if r.stage in durations else "Core"
-        durations[st] += r.duration_minutes
+        if r.start_time and r.end_time and r.end_time > r.start_time:
+            valid_records.append(r)
 
-    total_sleep_min = durations["Deep"] + durations["REM"] + durations["Core"]
-    total_hours = total_sleep_min / 60.0
-    deep_hours = durations["Deep"] / 60.0
-    rem_hours = durations["REM"] / 60.0
-    core_hours = durations["Core"] / 60.0
-    awake_hours = durations["Awake"] / 60.0
+    if not valid_records:
+        return {
+            "total_sleep_hours": 0.0,
+            "deep_sleep_hours": 0.0,
+            "rem_sleep_hours": 0.0,
+            "core_sleep_hours": 0.0,
+            "awake_hours": 0.0,
+            "sleep_score": 0.0
+        }
+
+    # Asleep stages (Deep, REM, Core, Asleep) - excludes InBed and Awake
+    asleep_stages = {"Deep", "REM", "Core", "Asleep", "Unspecified"}
+    asleep_intervals = [(r.start_time, r.end_time) for r in valid_records if r.stage in asleep_stages]
+
+    # Compute union of all time asleep (solves multi-device double counting)
+    total_asleep_mins = merge_time_intervals(asleep_intervals)
+    total_hours = min(24.0, total_asleep_mins / 60.0)
+
+    # Compute stage-specific merged durations
+    deep_mins = merge_time_intervals([(r.start_time, r.end_time) for r in valid_records if r.stage == "Deep"])
+    rem_mins = merge_time_intervals([(r.start_time, r.end_time) for r in valid_records if r.stage == "REM"])
+    awake_mins = merge_time_intervals([(r.start_time, r.end_time) for r in valid_records if r.stage == "Awake"])
+
+    # Allocate stages ensuring deep + rem + core == total_sleep_hours
+    deep_hours = min(total_hours, deep_mins / 60.0)
+    rem_hours = min(total_hours - deep_hours, rem_mins / 60.0)
+    core_hours = max(0.0, total_hours - (deep_hours + rem_hours))
+    awake_hours = awake_mins / 60.0
 
     # Calculate sleep score (0-100)
     # Target: 8.0h total, ~18% deep, ~22% rem
     duration_factor = min(100.0, (total_hours / 8.0) * 100.0)
-    deep_pct = (durations["Deep"] / total_sleep_min * 100.0) if total_sleep_min > 0 else 0
-    rem_pct = (durations["REM"] / total_sleep_min * 100.0) if total_sleep_min > 0 else 0
+    deep_pct = (deep_hours / total_hours * 100.0) if total_hours > 0 else 0.0
+    rem_pct = (rem_hours / total_hours * 100.0) if total_hours > 0 else 0.0
 
     deep_score = min(100.0, (deep_pct / 18.0) * 100.0)
     rem_score = min(100.0, (rem_pct / 22.0) * 100.0)

@@ -262,25 +262,28 @@ def plot_sleep_stages_timeline(df: pd.DataFrame) -> go.Figure:
 
     fig.update_layout(barmode="stack")
     apply_dark_layout(fig, title="Nightly Sleep Architecture Breakdown", height=350)
-    fig.update_yaxes(title="Duration (Hours)")
+    max_y = max(12.0, float(df["total_sleep_hours"].dropna().max() + 1.0)) if "total_sleep_hours" in df.columns and not df["total_sleep_hours"].dropna().empty else 12.0
+    fig.update_yaxes(title="Duration (Hours)", range=[0, min(24.0, max_y)])
     return fig
 
 
-def render_sleep_ribbon(deep_pct: float, rem_pct: float, core_pct: float, awake_pct: float) -> str:
+def render_sleep_ribbon(deep_pct: float, rem_pct: float, core_pct: float, awake_pct: float = 0.0) -> str:
     """Renders a modern horizontal sleep distribution ribbon bar."""
+    awake_bar = f'<div style="width:{awake_pct:.1f}%; background:{COLORS["awake"]};" title="Awake: {awake_pct:.1f}%"></div>' if awake_pct > 0 else ""
+    awake_legend = f'<span><i style="background:{COLORS["awake"]}"></i> Awake: <b>{awake_pct:.1f}%</b></span>' if awake_pct > 0 else ""
     return f"""
     <div class="sleep-ribbon-container">
         <div class="sleep-ribbon-bar">
-            <div style="width:{deep_pct}%; background:{COLORS['deep_sleep']};" title="Deep: {deep_pct:.1f}%"></div>
-            <div style="width:{rem_pct}%; background:{COLORS['rem_sleep']};" title="REM: {rem_pct:.1f}%"></div>
-            <div style="width:{core_pct}%; background:{COLORS['core_sleep']};" title="Core: {core_pct:.1f}%"></div>
-            <div style="width:{awake_pct}%; background:{COLORS['awake']};" title="Awake: {awake_pct:.1f}%"></div>
+            <div style="width:{deep_pct:.1f}%; background:{COLORS['deep_sleep']};" title="Deep: {deep_pct:.1f}%"></div>
+            <div style="width:{rem_pct:.1f}%; background:{COLORS['rem_sleep']};" title="REM: {rem_pct:.1f}%"></div>
+            <div style="width:{core_pct:.1f}%; background:{COLORS['core_sleep']};" title="Core: {core_pct:.1f}%"></div>
+            {awake_bar}
         </div>
         <div class="sleep-ribbon-legend">
             <span><i style="background:{COLORS['deep_sleep']}"></i> Deep: <b>{deep_pct:.1f}%</b></span>
             <span><i style="background:{COLORS['rem_sleep']}"></i> REM: <b>{rem_pct:.1f}%</b></span>
             <span><i style="background:{COLORS['core_sleep']}"></i> Core: <b>{core_pct:.1f}%</b></span>
-            <span><i style="background:{COLORS['awake']}"></i> Awake: <b>{awake_pct:.1f}%</b></span>
+            {awake_legend}
         </div>
     </div>
     """
