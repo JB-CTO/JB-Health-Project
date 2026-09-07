@@ -983,11 +983,14 @@ with tab_import:
 
     u_col1, u_col2, u_col3 = st.columns(3)
 
+    # 1. Apple Health Column
     with u_col1:
         st.markdown("""
-        <div style="background:rgba(17,24,39,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; min-height:220px;">
-            <div style="font-weight:700; color:#f8fafc; font-size:0.95rem; margin-bottom:4px;">🍎 Apple Health</div>
-            <div style="font-size:0.78rem; color:#94a3b8; margin-bottom:10px;">Upload <code>export.zip</code> or <code>export.xml</code> from iPhone.</div>
+        <div style="background:rgba(17,24,39,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; margin-bottom:12px;">
+            <div style="font-weight:700; color:#f8fafc; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                <span>🍎</span> Apple Health
+            </div>
+            <div style="font-size:0.78rem; color:#94a3b8; margin-top:4px;">Sleep stages, HRV, resting HR, VO2 Max, and workouts.</div>
         </div>
         """, unsafe_allow_html=True)
         ah_file = st.file_uploader("Upload Apple Health", type=["zip", "xml"], key="ah_up", label_visibility="collapsed")
@@ -1006,11 +1009,27 @@ with tab_import:
                 finally:
                     os.unlink(tmp_path)
 
+        with st.expander("📖 Step-by-Step Export Guide", expanded=False):
+            st.markdown("""
+            **How to export from your iPhone:**
+            1. Open the **Health** app on your iPhone.
+            2. Tap your **Profile Icon** in the top-right corner.
+            3. Scroll to the very bottom and tap **Export All Health Data**.
+            4. Tap **Export** to confirm. *(iOS will prepare an `export.zip` file; this can take 1–3 minutes)*.
+            5. Transfer the `export.zip` to your computer via **AirDrop**, **iCloud Drive**, or cable.
+            6. Drag & drop the `export.zip` file directly into the uploader above.
+            
+            💡 *Tip: You do not need to unzip the file! Our high-performance streaming parser reads `export.zip` directly.*
+            """)
+
+    # 2. MyFitnessPal Column
     with u_col2:
         st.markdown("""
-        <div style="background:rgba(17,24,39,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; min-height:220px;">
-            <div style="font-weight:700; color:#f8fafc; font-size:0.95rem; margin-bottom:4px;">🥗 MyFitnessPal</div>
-            <div style="font-size:0.78rem; color:#94a3b8; margin-bottom:10px;">Upload nutrition summary <code>.csv</code> export.</div>
+        <div style="background:rgba(17,24,39,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; margin-bottom:12px;">
+            <div style="font-weight:700; color:#f8fafc; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                <span>🥗</span> MyFitnessPal
+            </div>
+            <div style="font-size:0.78rem; color:#94a3b8; margin-top:4px;">Daily calories, macros (protein, carbs, fat), and hydration.</div>
         </div>
         """, unsafe_allow_html=True)
         mfp_file = st.file_uploader("Upload MFP CSV", type=["csv"], key="mfp_up", label_visibility="collapsed")
@@ -1026,11 +1045,29 @@ with tab_import:
                 finally:
                     os.unlink(tmp_path)
 
+        with st.expander("📖 Setup & Export Guide", expanded=False):
+            st.markdown("""
+            **Method 1: Apple Health Sync (Automatic - Recommended)**
+            1. On iPhone: Open **Health** > Profile > **Apps** > **MyFitnessPal**.
+            2. Turn **ON** all nutrition categories (Dietary Energy, Protein, Carbs, Fat, Fiber, Water).
+            3. When you export Apple Health, all your MyFitnessPal data is automatically included!
+
+            **Method 2: Standalone CSV Export**
+            1. Log in at **myfitnesspal.com** (or in the mobile app under *More* > *Reports*).
+            2. Navigate to **Reports** > **Nutrition**.
+            3. Select your desired timeframe (e.g. 90 days or All Time).
+            4. Click **Export Data** to download your Nutrition Summary `.csv`.
+            5. Drag & drop the `.csv` file into the uploader above.
+            """)
+
+    # 3. Quest Diagnostics Column
     with u_col3:
         st.markdown("""
-        <div style="background:rgba(17,24,39,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; min-height:220px;">
-            <div style="font-weight:700; color:#f8fafc; font-size:0.95rem; margin-bottom:4px;">🧪 Quest Diagnostics</div>
-            <div style="font-size:0.78rem; color:#94a3b8; margin-bottom:10px;">Upload lab report <code>.pdf</code> or structured <code>.csv</code>.</div>
+        <div style="background:rgba(17,24,39,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; margin-bottom:12px;">
+            <div style="font-weight:700; color:#f8fafc; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                <span>🧪</span> Quest Diagnostics
+            </div>
+            <div style="font-size:0.78rem; color:#94a3b8; margin-top:4px;">Official PDF lab reports or custom CSV logs.</div>
         </div>
         """, unsafe_allow_html=True)
         quest_file = st.file_uploader("Upload Quest Report", type=["pdf", "csv"], key="quest_up", label_visibility="collapsed")
@@ -1046,6 +1083,18 @@ with tab_import:
                     st.rerun()
                 finally:
                     os.unlink(tmp_path)
+
+        with st.expander("📖 How to Download from Quest", expanded=False):
+            st.markdown("""
+            **How to download official Quest PDF reports:**
+            1. Log into your patient account at **[myquest.questdiagnostics.com](https://myquest.questdiagnostics.com)** (or the MyQuest mobile app).
+            2. Go to the **Results** or **Lab Results** tab.
+            3. Click on your lab appointment / blood draw date.
+            4. Click **Download PDF Report** (or *View/Download Official PDF Report*).
+            5. Drag & drop the downloaded `.pdf` file into the uploader above.
+            
+            💡 *Spreadsheet Users: You can also upload a `.csv` with columns: `date, test_name, value, unit, ref_low, ref_high, flag`.*
+            """)
 
     st.markdown("---")
     st.markdown("##### Local Database Inventory")
