@@ -993,9 +993,30 @@ with tab_import:
             <div style="font-size:0.78rem; color:#94a3b8; margin-top:4px;">Sleep stages, HRV, resting HR, VO2 Max, and workouts.</div>
         </div>
         """, unsafe_allow_html=True)
-        ah_file = st.file_uploader("Upload Apple Health", type=["zip", "xml"], key="ah_up", label_visibility="collapsed")
+
+        # Check for local file in data/raw/
+        local_raw_files = list(Path("data/raw").glob("*.zip")) + list(Path("data/raw").glob("*.xml"))
+        if local_raw_files:
+            detected_file = local_raw_files[0]
+            file_mb = detected_file.stat().st_size / (1024 * 1024)
+            st.markdown(f"""
+            <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:10px 14px; margin-bottom:10px;">
+                <div style="color:#34d399; font-weight:600; font-size:0.82rem;">⚡ Local File Detected in data/raw/</div>
+                <div style="color:#f8fafc; font-size:0.85rem; font-weight:700;">{detected_file.name} ({file_mb:.1f} MB)</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🚀 Import Local {detected_file.name}", use_container_width=True):
+                with st.spinner(f"Streaming {detected_file.name} directly from disk ({file_mb:.1f} MB)..."):
+                    counts = AppleHealthParser(str(detected_file)).parse_and_store()
+                    compute_daily_recovery()
+                    compute_training_load()
+                    st.success(f"Parsed: {counts['sleep']} sleep, {counts['hrv']} HRV, {counts['workouts']} workouts.")
+                    st.rerun()
+            st.caption("— OR upload via browser below (up to 2GB supported) —")
+
+        ah_file = st.file_uploader("Upload Apple Health (up to 2GB)", type=["zip", "xml"], key="ah_up", label_visibility="collapsed")
         if ah_file and st.button("Process Apple Health", use_container_width=True):
-            with st.spinner("Streaming XML records..."):
+            with st.spinner(f"Streaming {ah_file.name} ({ah_file.size / (1024*1024):.1f} MB)..."):
                 suffix = ".zip" if ah_file.name.endswith(".zip") else ".xml"
                 with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
                     tmp.write(ah_file.getvalue())
@@ -1017,9 +1038,12 @@ with tab_import:
             3. Scroll to the very bottom and tap **Export All Health Data**.
             4. Tap **Export** to confirm. *(iOS will prepare an `export.zip` file; this can take 1–3 minutes)*.
             5. Transfer the `export.zip` to your computer via **AirDrop**, **iCloud Drive**, or cable.
-            6. Drag & drop the `export.zip` file directly into the uploader above.
             
-            💡 *Tip: You do not need to unzip the file! Our high-performance streaming parser reads `export.zip` directly.*
+            **Handling Large Files (200MB+):**
+            - **Option 1 (Fastest / Zero Browser Overhead)**: Copy your `export.zip` file directly into your project's `data/raw/` folder on your computer. The dashboard will automatically detect it and offer an instant 1-click import button!
+            - **Option 2 (Direct Upload)**: Drag & drop `export.zip` into the uploader above (browser limit has been increased to 2GB).
+            
+            🔒 *Privacy Note: `data/raw/` is strictly blocked by `.gitignore`, so your personal health file will never be committed or uploaded to GitHub.*
             """)
 
     # 2. MyFitnessPal Column
