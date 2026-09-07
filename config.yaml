@@ -31,3 +31,11 @@ training_load:
 
 database:
   path: "data/health.db"
+
+gemini:
+  default_model: "gemini-3.7-flash"
+  models:
+    - "gemini-3.7-flash"
+    - "gemini-2.5-pro"
+    - "gemini-3.5-flash-lite"
+  temperature: 0.4

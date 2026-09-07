@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-09-07
+
+### Added
+- Add Google Gemini AI Health & Longevity Coach: 1-click executive briefings, biomarker interpretation, and interactive chat
+
+---
+
 ## [1.2.2] - 2026-09-07
 
 ### Changed

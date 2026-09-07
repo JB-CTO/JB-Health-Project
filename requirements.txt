@@ -17,5 +17,8 @@ reportlab>=4.0.0
 streamlit>=1.35.0
 plotly>=5.22.0
 
+# AI & Intelligence
+google-genai>=2.2.0
+
 # Testing & Quality
 pytest>=8.2.0

@@ -26,6 +26,7 @@ SENSITIVE_PATTERNS = [
     (r"\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b", "Social Security Number (SSN)"),
     (r"(?i)\bMRN[:\s#]+[0-9]{6,}\b", "Medical Record Number (MRN)"),
     (r"(?i)ghp_[A-Za-z0-9]{36}", "GitHub Personal Access Token"),
+    (r"AIza[0-9A-Za-z\-_]{35}", "Google Gemini API Key"),
 ]
 
 

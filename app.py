@@ -34,6 +34,8 @@ from src.ui.components import (
     render_stat_card, render_sleep_ribbon, render_biomarker_range_bar,
     apply_dark_layout, COLORS
 )
+from src.ai.context_builder import build_health_context
+from src.ai.gemini_assistant import GeminiHealthAssistant, AVAILABLE_MODELS
 
 # Set page configuration
 st.set_page_config(
@@ -378,6 +380,34 @@ with st.sidebar:
         else:
             st.caption("No changelog found.")
 
+    with st.expander("🤖 Gemini AI Settings", expanded=False):
+        env_key = os.environ.get("GEMINI_API_KEY", "")
+        session_key = st.session_state.get("gemini_api_key", env_key)
+        
+        user_key = st.text_input(
+            "Google Gemini API Key",
+            value=session_key,
+            type="password",
+            help="Free key from https://aistudio.google.com/app/apikey"
+        )
+        if user_key != session_key:
+            st.session_state["gemini_api_key"] = user_key
+            st.rerun()
+
+        model_choice = st.selectbox(
+            "AI Model",
+            AVAILABLE_MODELS,
+            index=0,
+            help="gemini-3.7-flash is recommended for speed and clinical reasoning."
+        )
+        st.session_state["gemini_model"] = model_choice
+
+        if user_key:
+            st.markdown('<span style="color:#10b981; font-weight:600; font-size:0.8rem;">● Gemini Connected</span>', unsafe_allow_html=True)
+        else:
+            st.markdown('<span style="color:#94a3b8; font-weight:500; font-size:0.8rem;">○ API Key Not Set (Local Mode)</span>', unsafe_allow_html=True)
+            st.caption("[Get a free key at Google AI Studio](https://aistudio.google.com/app/apikey)")
+
     st.markdown("---")
     st.markdown("""
     <div style="font-size:0.75rem; color:#64748b; line-height:1.4;">
@@ -412,7 +442,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Tabs
-tab_recovery, tab_sleep, tab_perf, tab_labs, tab_nutrition, tab_correlations, tab_builder, tab_import = st.tabs([
+tab_recovery, tab_sleep, tab_perf, tab_labs, tab_nutrition, tab_correlations, tab_builder, tab_ai, tab_import = st.tabs([
     "⚡ Readiness & Recovery",
     "🌙 Sleep Architecture",
     "🏋️ Performance & Training Load",
@@ -420,6 +450,7 @@ tab_recovery, tab_sleep, tab_perf, tab_labs, tab_nutrition, tab_correlations, ta
     "🥗 Nutrition & Fueling",
     "🔍 Lifestyle Correlations",
     "📊 Custom Dashboard",
+    "🤖 Gemini AI Coach",
     "📁 Data Import"
 ])
 
@@ -988,7 +1019,129 @@ with tab_builder:
         st.write("No data available to plot.")
 
 # -------------------------------------------------------------------------------------------------
-# TAB 8: DATA IMPORT & FILE MANAGEMENT
+# TAB 8: GEMINI AI HEALTH COACH
+# -------------------------------------------------------------------------------------------------
+with tab_ai:
+    st.markdown("""
+    <div style="margin-bottom:16px;">
+        <h3 style="margin:0; color:#f8fafc; display:flex; align-items:center; gap:8px;">
+            <span>🤖</span> Gemini AI Health & Longevity Coach
+        </h3>
+        <div style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">
+            Evidence-based clinical intelligence synthesizing your Apple Health recovery, training load, nutrition, and Quest Diagnostics blood work.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Initialize assistant
+    active_key = st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
+    active_model = st.session_state.get("gemini_model", "gemini-3.7-flash")
+    ai_assistant = GeminiHealthAssistant(api_key=active_key, model_name=active_model)
+
+    # Pre-build structured de-identified context
+    health_ctx = build_health_context(days=max_days, targets=targets)
+
+    if not ai_assistant.is_available():
+        st.markdown("""
+        <div style="background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.25); border-radius:12px; padding:20px; margin-bottom:20px;">
+            <div style="color:#22d3ee; font-weight:700; font-size:1.05rem;">🔑 Connect Google Gemini to Activate AI Health Intelligence</div>
+            <div style="color:#94a3b8; font-size:0.88rem; margin-top:6px; line-height:1.5;">
+                To generate personalized longevity briefings, deep clinical lab interpretations, and interactive coaching from your actual health data:
+                <ol style="margin-top:8px; margin-bottom:8px; padding-left:20px;">
+                    <li>Get a free Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#38bdf8; text-decoration:underline;">Google AI Studio</a>.</li>
+                    <li>Enter it in the <b>🤖 Gemini AI Settings</b> section in the left sidebar.</li>
+                </ol>
+                <i>🔒 Privacy Guarantee: Your API key is stored only in your browser session state and never committed or saved to disk. Data sent to Gemini is 100% de-identified (zero names, addresses, or MRNs).</i>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Section 1: 1-Click Executive Intelligence Briefings
+    st.markdown("#### ⚡ 1-Click Intelligence Reports")
+    b_col1, b_col2, b_col3, b_col4 = st.columns(4)
+    with b_col1:
+        if st.button("📑 Whole-Body Briefing", use_container_width=True, help="Full synthesis of recovery, sleep, workouts, and biomarkers"):
+            with st.spinner("Analyzing physiological data with Gemini..."):
+                st.session_state["gemini_briefing"] = ai_assistant.generate_executive_briefing(health_ctx)
+                st.rerun()
+
+    with b_col2:
+        if st.button("🧪 Biomarker Deep Dive", use_container_width=True, help="Clinical interpretation of Quest blood work vs optimal longevity targets"):
+            with st.spinner("Analyzing blood work & longevity markers..."):
+                st.session_state["gemini_briefing"] = ai_assistant.generate_executive_briefing(health_ctx, focus_area="Clinical Biomarkers & Quest Blood Work (Lipids, ApoB, hs-CRP, Metabolic health, Hormones, optimal longevity ranges)")
+                st.rerun()
+
+    with b_col3:
+        if st.button("🏋️ Workout Prescription", use_container_width=True, help="Training load recommendations based on acute fatigue vs chronic fitness"):
+            with st.spinner("Evaluating training load & freshness..."):
+                st.session_state["gemini_briefing"] = ai_assistant.generate_executive_briefing(health_ctx, focus_area="Athletic Training Load & Workout Prescription (Acute fatigue ATL, Chronic fitness CTL, TSB readiness, ACWR injury prevention)")
+                st.rerun()
+
+    with b_col4:
+        if st.button("🌙 Sleep Architecture Protocol", use_container_width=True, help="Personalized behavioral sleep protocol to optimize deep sleep and REM"):
+            with st.spinner("Diagnosing sleep architecture..."):
+                st.session_state["gemini_briefing"] = ai_assistant.generate_executive_briefing(health_ctx, focus_area="Sleep Architecture Optimization (Deep sleep cellular repair, REM cognitive restoration, sleep debt eradication)")
+                st.rerun()
+
+    # Display generated briefing if available
+    if "gemini_briefing" in st.session_state and st.session_state["gemini_briefing"]:
+        st.markdown("""
+        <div style="background:rgba(17,24,39,0.7); border:1px solid rgba(6,182,212,0.3); border-radius:12px; padding:20px; margin-top:14px; margin-bottom:20px;">
+        """, unsafe_allow_html=True)
+        st.markdown(st.session_state["gemini_briefing"])
+        st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("✖ Clear Briefing", key="clear_briefing"):
+            del st.session_state["gemini_briefing"]
+            st.rerun()
+
+    st.markdown("---")
+
+    # Section 2: Interactive Multi-Turn Health Chat
+    st.markdown("#### 💬 Interactive Health Chat")
+    st.caption("Ask questions about your sleep, HRV, workouts, nutrition, or Quest lab results:")
+
+    if "gemini_chat_history" not in st.session_state:
+        st.session_state["gemini_chat_history"] = []
+
+    # Display chat history
+    for msg in st.session_state["gemini_chat_history"]:
+        with st.chat_message(msg["role"], avatar="⚡" if msg["role"] == "assistant" else "👤"):
+            st.markdown(msg["content"])
+
+    # Chat input
+    user_prompt = st.chat_input("Ask Gemini about your health data (e.g. 'How does my protein intake relate to my deep sleep?')...")
+    if user_prompt:
+        st.session_state["gemini_chat_history"].append({"role": "user", "content": user_prompt})
+        with st.chat_message("user", avatar="👤"):
+            st.markdown(user_prompt)
+
+        with st.chat_message("assistant", avatar="⚡"):
+            if ai_assistant.is_available():
+                response_text = st.write_stream(ai_assistant.stream_chat_turn(
+                    user_message=user_prompt,
+                    chat_history=st.session_state["gemini_chat_history"][:-1],
+                    health_context=health_ctx
+                ))
+            else:
+                response_text = ai_assistant.chat_turn(user_prompt, [], health_ctx)
+                st.markdown(response_text)
+        
+        st.session_state["gemini_chat_history"].append({"role": "assistant", "content": response_text})
+
+    if st.session_state["gemini_chat_history"]:
+        if st.button("🗑️ Clear Chat History", key="clear_chat"):
+            st.session_state["gemini_chat_history"] = []
+            st.rerun()
+
+    st.markdown("---")
+
+    # Section 3: Transparent Context Inspector
+    with st.expander("🔍 Inspect De-Identified Data Context Passed to Gemini", expanded=False):
+        st.caption("This is the exact structured Markdown snapshot assembled from your database that grounds Gemini's answers:")
+        st.code(health_ctx, language="markdown")
+
+# -------------------------------------------------------------------------------------------------
+# TAB 9: DATA IMPORT & FILE MANAGEMENT
 # -------------------------------------------------------------------------------------------------
 with tab_import:
     st.markdown("""

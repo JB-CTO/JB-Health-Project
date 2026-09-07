@@ -3,7 +3,7 @@
 > **An open-source, privacy-first personal health, recovery, and performance intelligence platform.**  
 > Unify data from **Apple Health**, **MyFitnessPal**, and **Quest Diagnostics (Blood Work)** into interactive, actionable dashboards to optimize sleep, physiological recovery, and athletic training load.
 
-[![Version: v1.2.2](https://img.shields.io/badge/Version-v1.2.2-cyan.svg)](CHANGELOG.md)
+[![Version: v1.3.0](https://img.shields.io/badge/Version-v1.3.0-cyan.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35%2B-red.svg)](https://streamlit.io/)
@@ -52,6 +52,16 @@
 
 ### 7. 📊 Custom Visualizer & Ad-Hoc Dashboard Builder
 - Create custom charts on the fly by selecting any X-axis, Y-axis, chart type (Line, Bar, Scatter with OLS trendline, Box plot), and date ranges.
+
+### 8. 🤖 Gemini AI Health & Longevity Coach
+- **Evidence-Based Multimodal Clinical Synthesis**: Connects Google Gemini (`gemini-3.7-flash`, `gemini-2.5-pro`) to your unified health data.
+- **1-Click Executive Reports**:
+  - *Whole-Body Longevity & Recovery Briefing*
+  - *Biomarker Deep Dive (Quest lab flags vs optimal preventive medicine targets)*
+  - *Daily Workout & Training Load Prescription*
+  - *Sleep Architecture Optimization Protocol*
+- **Interactive Multi-Turn Health Chat**: Ask questions about your recovery trends, nutrition balance, or blood work in real time.
+- **100% De-Identified Context**: Personal identifiers are never sent; API keys are kept in session memory and never committed to Git.
 
 ---
 
